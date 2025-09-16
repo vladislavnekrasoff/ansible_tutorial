@@ -35,6 +35,31 @@
         group: root
         mode: 0644
 
+    - name: start apache onf Ubuntu automatically
+      tags: apache,apache2,ubuntu
+      service: 
+        name: apache2
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"       
+
+    - name: change Timeout setting for apache2.conf
+      tags: apache,apache2,ubuntu
+      lineinfile:
+        path: /etc/apache2/apache2.conf
+        regexp: '^Timeout'
+        line: Timeout 500
+      when: ansible_distribution == "Ubuntu" 
+      register: apache2_conf_changed
+
+    - name: restart apache2 (Ubuntu)
+      tags: apache,apache2,ubuntu
+      service:
+        name: apache2
+        state: restarted
+      when: apache2_conf_changed.changed
+    
+
 - hosts: db_servers
   become: true
   tasks:
