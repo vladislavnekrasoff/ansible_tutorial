@@ -1,21 +1,27 @@
-- name: install apache2 package (Ubuntu)
+- name: install apache and php packages 
   tags: apache,apache2,ubuntu
-  apt:
+  package:
     name:
-      - apache2
-      - libapache2-mod-php
+      - "{{ apache_package_name }}"
+      - "{{ php_package_name }}"
     state: latest
-  when: ansible_distribution == "Ubuntu"
+
+- name: start and enable apache service
+  tags: apache,apache2
+  service:
+    name: "{{ apache_service }}"
+    state: started
+    enabled: yes
 
 - name: change Timeout setting for apache2.conf
   tags: apache,apache2,ubuntu
   lineinfile:
     path: /etc/apache2/apache2.conf
     regexp: '^Timeout'
-    line: Timeout 500
+    line: Timeout 700
   when: ansible_distribution == "Ubuntu" 
-  register: apache2_conf_changed
- 
+  notify: restart_apache
+
 - name: copy html file for site
   tags: apache,apache,apache2,httpd
   copy:
